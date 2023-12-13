@@ -1,0 +1,353 @@
+---
+sidebar_position: 1
+---
+
+# Dec-2023 Init Project
+
+Implemented the MVP version that has the most important features
+
+- `tag:`
+- `date:`
+
+## HTTP Gateway
+
+Implemented HTTP Gateway server that use [GIN](https://github.com/gin-gonic/gin)
+to handle RESTFul APIs
+
+- [POST api/v1/signup](#post-apiv1signup)
+- [POST api/v1/login](#post-apiv1login)
+- [POST api/v1/authz](#post-apiv1authz)
+- [PUT api/v1/users/transactions](#put-apiv1userstransactions)
+- [PUT api/v1/users/topups](#put-apiv1userstopups)
+- [POST api/v1/users/transactions/_query](#post-apiv1userstransactions_query)
+- [GET api/v1/users/wallets](#get-apiv1userswallets)
+
+### POST api/v1/signup
+
+#### Request
+
+```yaml
+email:
+  type: string
+password:
+  type: string
+name:
+  type: string
+```
+
+#### Response
+
+```yaml
+# type Response
+code:
+  type: common.Code
+
+# type common.Code
+id:
+  type: uint32
+msg:
+  type: string
+```
+
+### POST api/v1/login
+
+#### Request
+
+```yaml
+email:
+  type: string
+password:
+  type: string
+```
+
+#### Response
+
+```yaml
+code:
+  type: common.Code
+```
+
+### POST api/v1/authz
+
+#### Request
+
+```yaml
+# empty object
+```
+
+#### Response
+
+```yaml
+code:
+  type: common.Code
+```
+
+### PUT api/v1/users/transactions
+
+#### Request
+
+```yaml
+to_email:
+  type: string
+amount:
+  type: int64
+```
+
+#### Response
+
+```yaml
+code:
+  type: common.Code
+```
+
+### PUT api/v1/users/topups
+
+#### Request
+
+```yaml
+amount:
+  type: int64
+```
+
+#### Response
+
+```yaml
+code:
+  type: common.Code
+```
+
+### POST api/v1/users/transactions/_query
+
+#### Request
+
+```yaml
+# type Request
+pagination:
+  type: Pagination
+
+# type Pagination
+val:
+  type: int64
+  remark: cursor value
+imit:
+  type: uint32
+  remark: cursor value
+as_more:
+  type: bool
+  remark: the server will not check this value of a request.
+    But client should use this to check if need to send another request to query more data
+```
+
+#### Response
+
+```yaml
+# type Response
+code:
+  type: common.Code
+data:
+  type: GetUserTransactionsData
+
+# type GetUserTransactionsData
+transactions:
+  type: [ ]Transaction
+next_pagination:
+  type: Pagination
+
+# type Transaction
+id:
+  type: uint64
+from:
+  type: User
+to:
+  type: User
+amount:
+  type: int64
+status:
+  type: uint32
+ctime:
+  type: uint64
+
+# type User
+id:
+  type: uint64
+name:
+  type: string
+email:
+  type: string
+```
+
+### GET api/v1/users/wallets
+
+#### Request
+
+```yaml
+# Empty request
+```
+
+#### Response
+
+```yaml
+# type Response
+code:
+  type: common.Code
+data:
+  type: GetUserWalletData
+
+# type GetUserWalletData
+balance:
+  type: int64
+```
+
+## User service
+
+Implemented the [gRPC](https://grpc.io/) service that handle the following
+features
+
+- Signup
+- Login
+- Authorization
+- Get User's info
+
+### Signup
+
+```mermaid
+sequenceDiagram
+participant u as User
+participant h as HTTP Gateway
+participant us as User Service
+participant db as golden_pay_db
+participant k as Event Queue
+
+u->>h: PUT api/v1/signup
+h->>us: RPC signup
+us->>db: insert new User
+us->>k: push new_user event
+```
+
+### Login
+
+```mermaid
+sequenceDiagram
+participant u as User
+participant h as HTTP Gateway
+participant us as User Service
+participant db as golden_pay_db
+
+u->>h: POST api/v1/login
+h->>us: RPC login
+us->>db: get User
+us->>h: resp JWT token
+h->>u: SetCookie JWT token
+```
+
+### Authorization
+
+```mermaid
+sequenceDiagram
+participant u as User
+participant h as HTTP Gateway
+participant us as User Service
+
+u->>h: POST api/v1/authz
+h->>us: RPC authz
+```
+
+## Wallet service
+
+Implemented the [gRPC](https://grpc.io/) service that handle the following
+features
+
+- Transfer
+- Topup
+- Get user's transactions
+- Process Transfer
+- Create wallet
+
+### Transfer
+
+```mermaid
+sequenceDiagram
+participant u as User
+participant h as HTTP Gateway
+participant us as User Service
+participant ws as Wallet Service
+participant db as golden_pay_db
+participant k as Event Queue
+
+u->>h: PUT api/v1/users/transactions
+h->>us: RPC authz
+h->>ws: RPC transfer
+ws->>db: get wallet FOR UPDATE
+ws->>db: update from_user's wallet
+ws->>db: insert new transaction
+ws->>k: push new_transaction event
+```
+
+### Topup
+
+```mermaid
+sequenceDiagram
+participant u as User
+participant h as HTTP Gateway
+participant us as User Service
+participant ws as Wallet Service
+participant db as golden_pay_db
+
+u->>h: POST api/v1/users/topups
+h->>us: RPC authz
+h->>ws: RPC topup
+ws->>db: get wallet FOR UPDATE
+ws->>db: update wallet
+ws->>db: insert new topup
+```
+
+### Get user's transactions
+
+```mermaid
+sequenceDiagram
+participant u as User
+participant h as HTTP Gateway
+participant us as User Service
+participant ws as Wallet Service
+participant db as golden_pay_db
+
+u->>h: GET api/v1/users/transactions
+h->>us: RPC authz
+h->>ws: RPC get_user_transactions
+ws->>db: query order by id desc
+```
+
+### Process Transaction
+
+```mermaid
+sequenceDiagram
+participant e as Event Handler
+participant k as Event Queue
+participant ws as Wallet Service
+participant db as golden_pay_db
+
+e->>k: poll
+e->>ws: RPC process_transaction
+ws->>db: get wallet FOR UPDATE
+ws->>db: update to_user's wallet
+```
+
+### Create Wallet
+
+```mermaid
+sequenceDiagram
+participant e as Event Handler
+participant k as Event Queue
+participant ws as Wallet Service
+participant db as golden_pay_db
+
+e->>k: poll
+e->>ws: RPC create_wallet
+ws->>db: insert wallet
+```
+
+## Event handler
+
+- Listen to `new_user` event to create user's wallet
+- Listen to `new_transaction` event to verify and process a transaction to move
+  it from `pending` to `success` or `rejected`

@@ -1,0 +1,23 @@
+{
+  "unversionedId": "golden_pay/changelog/dec_2023_init_project",
+  "id": "golden_pay/changelog/dec_2023_init_project",
+  "title": "Dec-2023 Init Project",
+  "description": "Implemented the MVP version that has the most important features",
+  "source": "@site/docs/golden_pay/changelog/dec_2023_init_project.md",
+  "sourceDirName": "golden_pay/changelog",
+  "slug": "/golden_pay/changelog/dec_2023_init_project",
+  "permalink": "/docs/golden_pay/changelog/dec_2023_init_project",
+  "draft": false,
+  "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/golden_pay/changelog/dec_2023_init_project.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1
+  },
+  "sidebar": "goldenPay",
+  "previous": {
+    "title": "CHANGE LOG",
+    "permalink": "/docs/category/change-log-1"
+  }
+}

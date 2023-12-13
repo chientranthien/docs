@@ -1,0 +1,16 @@
+{
+  "title": "CHANGE LOG",
+  "description": "CHANGELOG",
+  "slug": "/category/change-log",
+  "permalink": "/docs/category/change-log",
+  "navigation": {
+    "previous": {
+      "title": "Features",
+      "permalink": "/docs/golden_pay/feature"
+    },
+    "next": {
+      "title": "Dec-2023 Init Project",
+      "permalink": "/docs/golden_pay/changelog/dec_2023_init_project"
+    }
+  }
+}

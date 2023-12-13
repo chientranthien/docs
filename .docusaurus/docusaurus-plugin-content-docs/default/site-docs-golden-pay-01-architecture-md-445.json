@@ -1,0 +1,27 @@
+{
+  "unversionedId": "golden_pay/architecture",
+  "id": "golden_pay/architecture",
+  "title": "Architecture",
+  "description": "Logical Architecture",
+  "source": "@site/docs/golden_pay/01_architecture.md",
+  "sourceDirName": "golden_pay",
+  "slug": "/golden_pay/architecture",
+  "permalink": "/docs/golden_pay/architecture",
+  "draft": false,
+  "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/golden_pay/01_architecture.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "sidebar_position": 2
+  },
+  "sidebar": "goldenPay",
+  "previous": {
+    "title": "GoldenPay Intro",
+    "permalink": "/docs/golden_pay/intro"
+  },
+  "next": {
+    "title": "Features",
+    "permalink": "/docs/golden_pay/feature"
+  }
+}

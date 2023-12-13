@@ -1,0 +1,643 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "loadedVersions": [
+        {
+          "versionName": "current",
+          "label": "Next",
+          "banner": null,
+          "badge": false,
+          "noIndex": false,
+          "className": "docs-version-current",
+          "path": "/docs",
+          "tagsPath": "/docs/tags",
+          "editUrl": "https://github.com/chientranthien/docs/tree/master/docs",
+          "editUrlLocalized": "https://github.com/chientranthien/docs/tree/master/i18n/en/docusaurus-plugin-content-docs/current",
+          "isLast": true,
+          "routePriority": -1,
+          "sidebarFilePath": "/home/chien_tran/0.workspace/docs/sidebars.js",
+          "contentPath": "/home/chien_tran/0.workspace/docs/docs",
+          "contentPathLocalized": "/home/chien_tran/0.workspace/docs/i18n/en/docusaurus-plugin-content-docs/current",
+          "docs": [
+            {
+              "unversionedId": "golden_pay/architecture",
+              "id": "golden_pay/architecture",
+              "title": "Architecture",
+              "description": "Logical Architecture",
+              "source": "@site/docs/golden_pay/01_architecture.md",
+              "sourceDirName": "golden_pay",
+              "slug": "/golden_pay/architecture",
+              "permalink": "/docs/golden_pay/architecture",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/golden_pay/01_architecture.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 2,
+              "frontMatter": {
+                "sidebar_position": 2
+              },
+              "sidebar": "goldenPay",
+              "previous": {
+                "title": "GoldenPay Intro",
+                "permalink": "/docs/golden_pay/intro"
+              },
+              "next": {
+                "title": "Features",
+                "permalink": "/docs/golden_pay/feature"
+              }
+            },
+            {
+              "unversionedId": "golden_pay/changelog/dec_2023_init_project",
+              "id": "golden_pay/changelog/dec_2023_init_project",
+              "title": "Dec-2023 Init Project",
+              "description": "Implemented the MVP version that has the most important features",
+              "source": "@site/docs/golden_pay/changelog/dec_2023_init_project.md",
+              "sourceDirName": "golden_pay/changelog",
+              "slug": "/golden_pay/changelog/dec_2023_init_project",
+              "permalink": "/docs/golden_pay/changelog/dec_2023_init_project",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/golden_pay/changelog/dec_2023_init_project.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 1,
+              "frontMatter": {
+                "sidebar_position": 1
+              },
+              "sidebar": "goldenPay",
+              "previous": {
+                "title": "CHANGE LOG",
+                "permalink": "/docs/category/change-log-1"
+              }
+            },
+            {
+              "unversionedId": "golden_pay/feature",
+              "id": "golden_pay/feature",
+              "title": "Features",
+              "description": "Signup",
+              "source": "@site/docs/golden_pay/02_feature.md",
+              "sourceDirName": "golden_pay",
+              "slug": "/golden_pay/feature",
+              "permalink": "/docs/golden_pay/feature",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/golden_pay/02_feature.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 3,
+              "frontMatter": {
+                "sidebar_position": 3
+              },
+              "sidebar": "goldenPay",
+              "previous": {
+                "title": "Architecture",
+                "permalink": "/docs/golden_pay/architecture"
+              },
+              "next": {
+                "title": "CHANGE LOG",
+                "permalink": "/docs/category/change-log-1"
+              }
+            },
+            {
+              "unversionedId": "golden_pay/intro",
+              "id": "golden_pay/intro",
+              "title": "GoldenPay Intro",
+              "description": "GoldenPay represents an exciting and dynamic experiment in which I've delved deep",
+              "source": "@site/docs/golden_pay/00_intro.md",
+              "sourceDirName": "golden_pay",
+              "slug": "/golden_pay/intro",
+              "permalink": "/docs/golden_pay/intro",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/golden_pay/00_intro.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 1,
+              "frontMatter": {
+                "sidebar_position": 1
+              },
+              "sidebar": "goldenPay",
+              "next": {
+                "title": "Architecture",
+                "permalink": "/docs/golden_pay/architecture"
+              }
+            },
+            {
+              "unversionedId": "intro",
+              "id": "intro",
+              "title": "Tutorial Intro",
+              "description": "Let's discover Docusaurus in less than 5 minutes.",
+              "source": "@site/docs/intro.md",
+              "sourceDirName": ".",
+              "slug": "/intro",
+              "permalink": "/docs/intro",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/intro.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 1,
+              "frontMatter": {
+                "sidebar_position": 1
+              },
+              "sidebar": "tutorialSidebar",
+              "next": {
+                "title": "Tutorial - Basics",
+                "permalink": "/docs/category/tutorial---basics"
+              }
+            },
+            {
+              "unversionedId": "tutorial-basics/congratulations",
+              "id": "tutorial-basics/congratulations",
+              "title": "Congratulations!",
+              "description": "You have just learned the basics of Docusaurus and made some changes to the initial template.",
+              "source": "@site/docs/tutorial-basics/congratulations.md",
+              "sourceDirName": "tutorial-basics",
+              "slug": "/tutorial-basics/congratulations",
+              "permalink": "/docs/tutorial-basics/congratulations",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/tutorial-basics/congratulations.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 6,
+              "frontMatter": {
+                "sidebar_position": 6
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Deploy your site",
+                "permalink": "/docs/tutorial-basics/deploy-your-site"
+              },
+              "next": {
+                "title": "Tutorial - Extras",
+                "permalink": "/docs/category/tutorial---extras"
+              }
+            },
+            {
+              "unversionedId": "tutorial-basics/create-a-blog-post",
+              "id": "tutorial-basics/create-a-blog-post",
+              "title": "Create a Blog Post",
+              "description": "Docusaurus creates a page for each blog post, but also a blog index page, a tag system, an RSS feed...",
+              "source": "@site/docs/tutorial-basics/create-a-blog-post.md",
+              "sourceDirName": "tutorial-basics",
+              "slug": "/tutorial-basics/create-a-blog-post",
+              "permalink": "/docs/tutorial-basics/create-a-blog-post",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/tutorial-basics/create-a-blog-post.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 3,
+              "frontMatter": {
+                "sidebar_position": 3
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Create a Document",
+                "permalink": "/docs/tutorial-basics/create-a-document"
+              },
+              "next": {
+                "title": "Markdown Features",
+                "permalink": "/docs/tutorial-basics/markdown-features"
+              }
+            },
+            {
+              "unversionedId": "tutorial-basics/create-a-document",
+              "id": "tutorial-basics/create-a-document",
+              "title": "Create a Document",
+              "description": "Documents are groups of pages connected through:",
+              "source": "@site/docs/tutorial-basics/create-a-document.md",
+              "sourceDirName": "tutorial-basics",
+              "slug": "/tutorial-basics/create-a-document",
+              "permalink": "/docs/tutorial-basics/create-a-document",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/tutorial-basics/create-a-document.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 2,
+              "frontMatter": {
+                "sidebar_position": 2
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Create a Page",
+                "permalink": "/docs/tutorial-basics/create-a-page"
+              },
+              "next": {
+                "title": "Create a Blog Post",
+                "permalink": "/docs/tutorial-basics/create-a-blog-post"
+              }
+            },
+            {
+              "unversionedId": "tutorial-basics/create-a-page",
+              "id": "tutorial-basics/create-a-page",
+              "title": "Create a Page",
+              "description": "Add Markdown or React files to src/pages to create a standalone page:",
+              "source": "@site/docs/tutorial-basics/create-a-page.md",
+              "sourceDirName": "tutorial-basics",
+              "slug": "/tutorial-basics/create-a-page",
+              "permalink": "/docs/tutorial-basics/create-a-page",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/tutorial-basics/create-a-page.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 1,
+              "frontMatter": {
+                "sidebar_position": 1
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Tutorial - Basics",
+                "permalink": "/docs/category/tutorial---basics"
+              },
+              "next": {
+                "title": "Create a Document",
+                "permalink": "/docs/tutorial-basics/create-a-document"
+              }
+            },
+            {
+              "unversionedId": "tutorial-basics/deploy-your-site",
+              "id": "tutorial-basics/deploy-your-site",
+              "title": "Deploy your site",
+              "description": "Docusaurus is a static-site-generator (also called Jamstack).",
+              "source": "@site/docs/tutorial-basics/deploy-your-site.md",
+              "sourceDirName": "tutorial-basics",
+              "slug": "/tutorial-basics/deploy-your-site",
+              "permalink": "/docs/tutorial-basics/deploy-your-site",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/tutorial-basics/deploy-your-site.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 5,
+              "frontMatter": {
+                "sidebar_position": 5
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Markdown Features",
+                "permalink": "/docs/tutorial-basics/markdown-features"
+              },
+              "next": {
+                "title": "Congratulations!",
+                "permalink": "/docs/tutorial-basics/congratulations"
+              }
+            },
+            {
+              "unversionedId": "tutorial-basics/markdown-features",
+              "id": "tutorial-basics/markdown-features",
+              "title": "Markdown Features",
+              "description": "Docusaurus supports Markdown and a few additional features.",
+              "source": "@site/docs/tutorial-basics/markdown-features.mdx",
+              "sourceDirName": "tutorial-basics",
+              "slug": "/tutorial-basics/markdown-features",
+              "permalink": "/docs/tutorial-basics/markdown-features",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/tutorial-basics/markdown-features.mdx",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 4,
+              "frontMatter": {
+                "sidebar_position": 4
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Create a Blog Post",
+                "permalink": "/docs/tutorial-basics/create-a-blog-post"
+              },
+              "next": {
+                "title": "Deploy your site",
+                "permalink": "/docs/tutorial-basics/deploy-your-site"
+              }
+            },
+            {
+              "unversionedId": "tutorial-extras/manage-docs-versions",
+              "id": "tutorial-extras/manage-docs-versions",
+              "title": "Manage Docs Versions",
+              "description": "Docusaurus can manage multiple versions of your docs.",
+              "source": "@site/docs/tutorial-extras/manage-docs-versions.md",
+              "sourceDirName": "tutorial-extras",
+              "slug": "/tutorial-extras/manage-docs-versions",
+              "permalink": "/docs/tutorial-extras/manage-docs-versions",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/tutorial-extras/manage-docs-versions.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 1,
+              "frontMatter": {
+                "sidebar_position": 1
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Tutorial - Extras",
+                "permalink": "/docs/category/tutorial---extras"
+              },
+              "next": {
+                "title": "Translate your site",
+                "permalink": "/docs/tutorial-extras/translate-your-site"
+              }
+            },
+            {
+              "unversionedId": "tutorial-extras/translate-your-site",
+              "id": "tutorial-extras/translate-your-site",
+              "title": "Translate your site",
+              "description": "Let's translate docs/intro.md to French.",
+              "source": "@site/docs/tutorial-extras/translate-your-site.md",
+              "sourceDirName": "tutorial-extras",
+              "slug": "/tutorial-extras/translate-your-site",
+              "permalink": "/docs/tutorial-extras/translate-your-site",
+              "draft": false,
+              "editUrl": "https://github.com/chientranthien/docs/tree/master/docs/tutorial-extras/translate-your-site.md",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 2,
+              "frontMatter": {
+                "sidebar_position": 2
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Manage Docs Versions",
+                "permalink": "/docs/tutorial-extras/manage-docs-versions"
+              },
+              "next": {
+                "title": "GoldenPay Intro",
+                "permalink": "/docs/golden_pay/intro"
+              }
+            }
+          ],
+          "drafts": [],
+          "sidebars": {
+            "tutorialSidebar": [
+              {
+                "type": "doc",
+                "id": "intro"
+              },
+              {
+                "type": "category",
+                "label": "Tutorial - Basics",
+                "collapsible": true,
+                "collapsed": true,
+                "items": [
+                  {
+                    "type": "doc",
+                    "id": "tutorial-basics/create-a-page"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "tutorial-basics/create-a-document"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "tutorial-basics/create-a-blog-post"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "tutorial-basics/markdown-features"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "tutorial-basics/deploy-your-site"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "tutorial-basics/congratulations"
+                  }
+                ],
+                "link": {
+                  "type": "generated-index",
+                  "description": "5 minutes to learn the most important Docusaurus concepts.",
+                  "slug": "/category/tutorial---basics",
+                  "permalink": "/docs/category/tutorial---basics"
+                }
+              },
+              {
+                "type": "category",
+                "label": "Tutorial - Extras",
+                "collapsible": true,
+                "collapsed": true,
+                "items": [
+                  {
+                    "type": "doc",
+                    "id": "tutorial-extras/manage-docs-versions"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "tutorial-extras/translate-your-site"
+                  }
+                ],
+                "link": {
+                  "type": "generated-index",
+                  "slug": "/category/tutorial---extras",
+                  "permalink": "/docs/category/tutorial---extras"
+                }
+              },
+              {
+                "type": "category",
+                "label": "golden_pay",
+                "collapsible": true,
+                "collapsed": true,
+                "items": [
+                  {
+                    "type": "doc",
+                    "id": "golden_pay/intro"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "golden_pay/architecture"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "golden_pay/feature"
+                  },
+                  {
+                    "type": "category",
+                    "label": "CHANGE LOG",
+                    "collapsible": true,
+                    "collapsed": true,
+                    "items": [
+                      {
+                        "type": "doc",
+                        "id": "golden_pay/changelog/dec_2023_init_project"
+                      }
+                    ],
+                    "link": {
+                      "type": "generated-index",
+                      "description": "CHANGELOG",
+                      "slug": "/category/change-log",
+                      "permalink": "/docs/category/change-log"
+                    }
+                  }
+                ]
+              }
+            ],
+            "goldenPay": [
+              {
+                "type": "doc",
+                "id": "golden_pay/intro"
+              },
+              {
+                "type": "doc",
+                "id": "golden_pay/architecture"
+              },
+              {
+                "type": "doc",
+                "id": "golden_pay/feature"
+              },
+              {
+                "type": "category",
+                "label": "CHANGE LOG",
+                "collapsible": true,
+                "collapsed": true,
+                "items": [
+                  {
+                    "type": "doc",
+                    "id": "golden_pay/changelog/dec_2023_init_project"
+                  }
+                ],
+                "link": {
+                  "type": "generated-index",
+                  "description": "CHANGELOG",
+                  "slug": "/category/change-log-1",
+                  "permalink": "/docs/category/change-log-1"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "docusaurus-plugin-content-blog": {
+    "default": {
+      "blogSidebarTitle": "Recent posts",
+      "blogPosts": [
+        {
+          "id": "id-generator",
+          "metadata": {
+            "permalink": "/blog/id-generator",
+            "editUrl": "https://github.com/chientranthien/docs/tree/master/blog/id_generator/oct_2023_id_generator.md",
+            "source": "@site/blog/id_generator/oct_2023_id_generator.md",
+            "title": "Id Generator",
+            "description": "Problem",
+            "date": "2023-12-13T03:56:27.000Z",
+            "formattedDate": "December 13, 2023",
+            "tags": [
+              {
+                "label": "idgenerator",
+                "permalink": "/blog/tags/idgenerator"
+              },
+              {
+                "label": "sharding",
+                "permalink": "/blog/tags/sharding"
+              }
+            ],
+            "readingTime": 0.12,
+            "hasTruncateMarker": false,
+            "authors": [
+              {
+                "name": "Tran Thien Chien",
+                "title": "Maintainer",
+                "url": "https://github.com/chientranthien",
+                "imageURL": "https://github.com/chientranthien.png",
+                "key": "chien"
+              }
+            ],
+            "frontMatter": {
+              "slug": "id-generator",
+              "title": "Id Generator",
+              "authors": "chien",
+              "tags": [
+                "idgenerator",
+                "sharding"
+              ]
+            }
+          },
+          "content": "## Problem\n\nYou have a single DB, you can take the advantage of \n![Architecture](./sharding.png)\n## Solutions\n### UUID\n### Redis\n### MySQL\n### Snowflake"
+        }
+      ],
+      "blogListPaginated": [
+        {
+          "items": [
+            "id-generator"
+          ],
+          "metadata": {
+            "permalink": "/blog",
+            "page": 1,
+            "postsPerPage": 10,
+            "totalPages": 1,
+            "totalCount": 1,
+            "blogDescription": "Blog",
+            "blogTitle": "Blog"
+          }
+        }
+      ],
+      "blogTags": {
+        "/blog/tags/idgenerator": {
+          "label": "idgenerator",
+          "items": [
+            "id-generator"
+          ],
+          "permalink": "/blog/tags/idgenerator",
+          "pages": [
+            {
+              "items": [
+                "id-generator"
+              ],
+              "metadata": {
+                "permalink": "/blog/tags/idgenerator",
+                "page": 1,
+                "postsPerPage": 10,
+                "totalPages": 1,
+                "totalCount": 1,
+                "blogDescription": "Blog",
+                "blogTitle": "Blog"
+              }
+            }
+          ]
+        },
+        "/blog/tags/sharding": {
+          "label": "sharding",
+          "items": [
+            "id-generator"
+          ],
+          "permalink": "/blog/tags/sharding",
+          "pages": [
+            {
+              "items": [
+                "id-generator"
+              ],
+              "metadata": {
+                "permalink": "/blog/tags/sharding",
+                "page": 1,
+                "postsPerPage": 10,
+                "totalPages": 1,
+                "totalCount": 1,
+                "blogDescription": "Blog",
+                "blogTitle": "Blog"
+              }
+            }
+          ]
+        }
+      },
+      "blogTagsListPath": "/blog/tags"
+    }
+  },
+  "docusaurus-plugin-content-pages": {
+    "default": [
+      {
+        "type": "jsx",
+        "permalink": "/",
+        "source": "@site/src/pages/index.js"
+      },
+      {
+        "type": "mdx",
+        "permalink": "/markdown-page",
+        "source": "@site/src/pages/markdown-page.md",
+        "title": "Markdown page example",
+        "description": "You don't need React to write simple standalone pages.",
+        "frontMatter": {
+          "title": "Markdown page example"
+        }
+      }
+    ]
+  },
+  "docusaurus-plugin-debug": {},
+  "docusaurus-theme-classic": {},
+  "docusaurus-theme-mermaid": {},
+  "docusaurus-bootstrap-plugin": {},
+  "docusaurus-mdx-fallback-plugin": {}
+}
