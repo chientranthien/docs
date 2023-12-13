@@ -1,0 +1,46 @@
+.features {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+  width: 100%;
+}
+
+.featureSvg {
+  height: 200px;
+  width: 200px;
+}
+.topBanner {
+  font-size: 49px;
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.topBannerTitle {
+  font-size: 73px;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+}
+
+.topBannerTitleText {
+  background: linear-gradient(45deg, #399cff, #00c775 80%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 72px;
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.topBannerTitleText:hover {
+  border-bottom: solid 2px;
+}
+
