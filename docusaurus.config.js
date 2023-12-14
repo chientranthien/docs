@@ -6,7 +6,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 
 const config = {
-  title: 'Tran Thien Chien\'s Site',
+  title: 'Chien Tran\'s Site',
   tagline: 'Software Engineer',
   favicon: 'img/golden.png',
 
