@@ -6,8 +6,8 @@ sidebar_position: 1
 
 Implemented the MVP version that has the most important features
 
-- `tag:`
-- `date:`
+- `tag:` v1.0.0
+- `date:` 2023-12-14
 
 ## HTTP Gateway
 
