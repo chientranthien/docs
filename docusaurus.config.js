@@ -85,7 +85,7 @@ const config = {
           },
           {to: '/blog', label: 'My Learning', position: 'left'},
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/chientranthien/docs',
             label: 'GitHub',
             position: 'right',
           },

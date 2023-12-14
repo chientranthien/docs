@@ -39,7 +39,7 @@ export default [
   },
   {
     path: '/blog',
-    component: ComponentCreator('/blog', 'b8c'),
+    component: ComponentCreator('/blog', 'd0a'),
     exact: true
   },
   {
@@ -49,7 +49,7 @@ export default [
   },
   {
     path: '/blog/id-generator',
-    component: ComponentCreator('/blog/id-generator', 'a5b'),
+    component: ComponentCreator('/blog/id-generator', '52b'),
     exact: true
   },
   {
@@ -59,12 +59,12 @@ export default [
   },
   {
     path: '/blog/tags/idgenerator',
-    component: ComponentCreator('/blog/tags/idgenerator', '225'),
+    component: ComponentCreator('/blog/tags/idgenerator', 'a6d'),
     exact: true
   },
   {
     path: '/blog/tags/sharding',
-    component: ComponentCreator('/blog/tags/sharding', '804'),
+    component: ComponentCreator('/blog/tags/sharding', '65c'),
     exact: true
   },
   {

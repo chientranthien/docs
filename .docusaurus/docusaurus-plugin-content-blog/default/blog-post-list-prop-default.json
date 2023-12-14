@@ -2,7 +2,7 @@
   "title": "Recent posts",
   "items": [
     {
-      "title": "Id Generator",
+      "title": "Distributed Id Generator",
       "permalink": "/blog/id-generator"
     }
   ]

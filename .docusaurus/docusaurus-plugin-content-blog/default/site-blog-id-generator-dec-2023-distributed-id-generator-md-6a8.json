@@ -1,0 +1,39 @@
+{
+  "permalink": "/blog/id-generator",
+  "editUrl": "https://github.com/chientranthien/docs/tree/master/blog/id_generator/dec_2023_distributed_id_generator.md",
+  "source": "@site/blog/id_generator/dec_2023_distributed_id_generator.md",
+  "title": "Distributed Id Generator",
+  "description": "Background",
+  "date": "2023-12-13T03:55:14.347Z",
+  "formattedDate": "December 13, 2023",
+  "tags": [
+    {
+      "label": "idgenerator",
+      "permalink": "/blog/tags/idgenerator"
+    },
+    {
+      "label": "sharding",
+      "permalink": "/blog/tags/sharding"
+    }
+  ],
+  "readingTime": 0.135,
+  "hasTruncateMarker": false,
+  "authors": [
+    {
+      "name": "Chien Tran",
+      "title": "Maintainer",
+      "url": "https://github.com/chientranthien",
+      "imageURL": "https://github.com/chientranthien.png",
+      "key": "chien"
+    }
+  ],
+  "frontMatter": {
+    "slug": "id-generator",
+    "title": "Distributed Id Generator",
+    "authors": "chien",
+    "tags": [
+      "idgenerator",
+      "sharding"
+    ]
+  }
+}
