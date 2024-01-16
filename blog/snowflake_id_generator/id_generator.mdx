@@ -3,7 +3,7 @@ slug: snowflake-id-generator
 title: Snowflake ID Generator
 authors: chien
 date: 2023-12-13
-tags: [idgenerator, sharding]
+tags: [idgenerator, sharding, snowflake]
 ---
 
 ## Background
@@ -32,18 +32,6 @@ performance even under high loads.
 **4. Security:** Some distributed ID generators offer features like random ID
 generation or cryptographic hashing to enhance security and prevent potential ID
 collisions or manipulation.
-
-Here are some specific examples of how distributed ID generators are used:
-
-- **Microservices**: Each microservice can generate its own IDs without relying
-  on a central service, leading to a more loosely coupled and scalable
-  architecture.
-- **Event-driven systems**: Unique IDs are crucial for tracking events across
-  different components of a distributed system.
-- **Messaging systems**: Each message needs a unique ID for identification and
-  routing.
-- **Data pipelines**: Data items require unique IDs for proper tracking and
-  processing across different stages of a pipeline.
 
 In this Blog, I will present one of the way to implement a
 distributed `ID Generator` based
