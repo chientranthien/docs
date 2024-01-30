@@ -120,7 +120,7 @@ const config = {
               },
               {
                 label: 'Discord',
-                href: 'https://discord.gg/EYFKbvEt',
+                href: 'https://discord.gg/b9aGw9Ts',
               },
             ],
           },
