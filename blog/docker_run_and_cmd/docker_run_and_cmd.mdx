@@ -9,8 +9,9 @@ tags: [docker]
 ## Background
 
 If you're new to `Docker` you may feel confused of the `RUN` and `CMD` command
-in the Docker file. Because they both seem to execute a command line. Like in
-the example below the `RUN cd /wrk` is to execute the command line "move to /wrk
+in the Docker file. Because they both seem to execute a command line. 
+
+Like in the example below the `RUN cd /wrk` is to execute the command line "move to /wrk
 folder" and the `CMD ./bin/user/exc` is to execute the `exc` binary file. So
 what are the differences between them?
 
@@ -37,7 +38,9 @@ CMD ./bin/user/exc
 | Outcome          | Changes made by `RUN` commands are persisted as a new layer in the image | `CMD` is called when a container is started. So changes made by `CMD` command will not be persisted |
 | Others           | it can have multiple `RUN` commands                                      | only the last `CMD` is executed                                                                     |
 
-```note
+:::info
+
 Docker also has `ENTRYPOINT` command which is similar to `CMD` except that
-`ENTRYPOINT` command can't be overrided by `docker run <new command> .
-```
+`ENTRYPOINT` command can't be overrided by `docker run <new command> .`
+
+:::
