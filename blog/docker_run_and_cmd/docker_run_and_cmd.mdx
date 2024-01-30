@@ -1,10 +1,43 @@
 ---
 slug: docker-run-and-cmd
-title: The Differences Between RUN and CMD
-authors: chien
-date: 2023-12-18
+title: The Differences Between RUN And CMD In Dockerfile 
+authors: chien 
+date: 2023-12-18 
 tags: [docker]
 ---
 
 ## Background
 
+If you're new to `Docker` you may feel confused of the `RUN` and `CMD` command
+in the Docker file. Because they both seem to execute a command line. Like in
+the example below the `RUN cd /wrk` is to execute the command line "move to /wrk
+folder" and the `CMD ./bin/user/exc` is to execute the `exc` binary file. So
+what are the differences between them?
+
+```dockerfile
+FROM chientt1993/golang:1.19
+RUN ln -sf /bin/bash /bin/sh
+
+WORKDIR /wrk
+COPY . /wrk
+RUN cd /wrk
+ARG G_ENV=dev
+RUN if [[ "$G_ENV" = "prod" ]] ; then make build/user ; else echo "building for dev env, only copy from local bin" ; fi
+
+RUN mkdir tmp; mv bin/user tmp/user ; rm bin/* -r; mv tmp/user bin/user
+
+CMD ./bin/user/exc
+```
+
+## Key Differences Between `RUN` and `CMD`
+|                  | RUN                                                                      | CMD                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Execution Timing | image build process                                                      | when a container is started                                                                         |
+| Purpose          | install dependencies, copy files, set up environment                     | to launch a runtime application or service                                                          |
+| Outcome          | Changes made by `RUN` commands are persisted as a new layer in the image | `CMD` is called when a container is started. So changes made by `CMD` command will not be persisted |
+| Others           | it can have multiple `RUN` commands                                      | only the last `CMD` is executed                                                                     |
+
+```note
+Docker also has `ENTRYPOINT` command which is similar to `CMD` except that
+`ENTRYPOINT` command can't be overrided by `docker run <new command> .
+```
