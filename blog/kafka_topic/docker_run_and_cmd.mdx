@@ -30,17 +30,17 @@ unread messages in the same order that they're written
 
 ## Consumer Commit
 ![commit](./commit.png)
-When a consumer commit a message to a topic. Kafka broker will produce a message
+When a consumer commit a message to a topic. `Kafka` broker will produce a message
 to the special topic `__consumer_offsets` to mark the latest read offset
 
 ## Partition
 ![n_partition](./n_partition.png)
-Because Kafka broker will only append the messages to the topic. Hence, if all
+Because `Kafka` broker will only append the messages to the topic. Hence, if all
 of the producers produce to and consumers consume from the topic. It may affect
-the performance. Hence, Kafka topic can have partitions. 
+the performance. Hence, `Kafka` topic can have partitions. 
 
 Producers can shard the data by partitions by sending the message with `key`
-field or can leave the `key` empty and let the Kafka broker choose the
+field or can leave the `key` empty and let the `Kafka` broker choose the
 partition.
 
 Each consumer of a consumer group can consume messages from multiple partitions.
