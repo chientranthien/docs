@@ -3,7 +3,7 @@ slug: kafka_topic
 title: Kafka Topic
 authors: chien 
 date: 2024-03-14
-tags: [kafka,consumer]
+tags: [kafka,kafka_topic]
 ---
 
 ## Kafka Topic
@@ -24,8 +24,9 @@ When a producer produce a message to a topic. Kafka broker will increase the
 offset by one and append the new message to the topic
 
 ## Consumer Poll
+![poll](./poll.png)
 When a consumer poll the messages from a topic, the Kafka broker will return the
-messages in the same order that they're written
+unread messages in the same order that they're written
 
 ## Consumer Commit
 ![commit](./commit.png)
