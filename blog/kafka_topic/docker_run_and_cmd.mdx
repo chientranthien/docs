@@ -8,10 +8,10 @@ tags: [kafka,kafka_topic]
 
 ## Kafka Topic
 ![1_partition](./1_partition.png)
-A Kafka topic is essentially a category or a stream for organizing messages in
-Apache Kafka.  Imagine it like a folder in a filing cabinet, but for data
+A `Kafka` topic is essentially a category or a stream for organizing messages in
+`Apache Kafka`.  Imagine it like a folder in a filing cabinet, but for data
 streams where producers can produce (push) messages to and consumers can
-consumer (pull) messages from
+consume (poll) messages from
 
 Each message of the topic is assigned to a unique number called offset. It
 essentially acts as a sequential counter that indicates the position of a
@@ -20,12 +20,12 @@ message within the ordered sequence of messages
 
 ## Producer Produce
 ![produce](./produce.png)
-When a producer produce a message to a topic. Kafka broker will increase the
+When a producer produce a message to a topic. `Kafka` broker will increase the
 offset by one and append the new message to the topic
 
 ## Consumer Poll
 ![poll](./poll.png)
-When a consumer poll the messages from a topic, the Kafka broker will return the
+When a consumer poll the messages from a topic, the `Kafka` broker will return the
 unread messages in the same order that they're written
 
 ## Consumer Commit
