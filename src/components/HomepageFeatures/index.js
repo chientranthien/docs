@@ -37,7 +37,7 @@ const FeatureList = [
             <>
                 Should you find yourself in need of any assistance or have any
                 inquiries, please do not hesitate to get in touch with me through
-                <Link href="https://discord.gg/b9aGw9Ts">
+                <Link href="https://discord.gg/anz2mwFsCD">
                     &nbsp;Discord
                 </Link> or
                 <Link to="https://www.linkedin.com/in/chien-tran-thien-529360137/">
