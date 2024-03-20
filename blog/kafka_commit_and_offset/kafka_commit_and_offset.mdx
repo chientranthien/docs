@@ -1,12 +1,13 @@
 ---
 slug: kafka_commit_and_offset
 title: Kafka Commit And Offset
-authors: chien 
+authors: chien
 date: 2024-03-17
-tags: [kafka,kafka_consumer]
+tags: [ kafka,kafka_consumer ]
 ---
 
 ## Kafka Commit And Offset
+
 ![commit](./commit.png)
 When a consumer consume messages from a topic, `Kafka` broker only returns the
 unread messages to the consumer instead of returning all of the messages of the
@@ -21,10 +22,10 @@ if it crash or another consumer join or leave the group which in turn trigger a
 rebalancing, each consumer may be assigned to a new set of partitions so how the
 consumer commit the offsets may cause duplicate or message lost
 
-
 ![duplicate](./duplicate.png)
 
-For example: if the consumers haven't committed the processed messages before the consumer
+For example: if the consumers haven't committed the processed messages before
+the consumer
 group rebalancing, it would receive these messages again and process them twice
 
 ![lost](./lost.png)
@@ -36,7 +37,8 @@ causing message lost
 
 If you choose auto commit, the consumer will auto commit the largest offset that
 is received by the previous pool if it exceeds the threshold/interval which is 5
-seconds by default and the consumer will check if it's time to commit whenever you poll
+seconds by default and the consumer will check if it's time to commit whenever
+you poll
 
 Even though, auto commit is very convenience but there are some drawbacks such
 as if the consumer crash or rebalance occur, messages may be polled twice. You
@@ -51,6 +53,7 @@ But usually the idea is similar. For example: the default interval of
 :::
 
 ## Manual Commit Or Sync Commit
+
 Manual commit is a way to explicitly commit the current offset instead of
 replying on the auto commit. This way developers have more control over the time
 when they want to commit the offsets
@@ -61,12 +64,14 @@ previous poll before calling commit otherwise you may suffer from message lost
 
 :::info
 Some library instead of committing the largest offset of the last poll, you need
-to tell it which offset to commit or what is the largest offset that is processed
-For example: [Sarama](https://github.com/IBM/sarama) users need to mark the
-processed messages by using `MarkOffset` or `MarkMessage` before calling
-`Commit`
+to tell it which offset to commit or what is the largest offset that is
+processed. For example: [Sarama](https://github.com/IBM/sarama) users need to
+mark the processed messages by using `MarkOffset` or `MarkMessage` before
+calling `Commit`
 :::
+
 ## Concurrent Processors And Offset Commit
+
 ![worker](./worker.png)
 
 When you consume messages one by one it normally is easy to guarantee the
@@ -75,8 +80,9 @@ Hence, some developers choose to process messages concurrently but they will
 need to handle the commit more carefully because larger offset messages can be
 processed before the smaller offset messages. So it may cause message lost if
 they commit the larger offset messages without waiting for the smaller offset
-messages to be processed. 
+messages to be processed.
 
 One of the solution to guarantee the commit ordering is to have a marked buffer
-to keep track of the offsets of the processed messages ensure all of the smaller
+to keep track of the offsets of the processed messages to ensure all of the
+smaller
 offsets are marked before commit a offset
