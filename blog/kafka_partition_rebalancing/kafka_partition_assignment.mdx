@@ -47,8 +47,8 @@ It splits the partitions of each topic into ranges and each range contains
 consecutive partitions and assign each range to the consumers.
 
 For example: in the figure above, **T1_P1**(topic 1, partition 1), **T1_P2**,
-**T2_P1**, and *T2_P2** are assigned to **C1** (consumer 1) whereas **T1_P3**,
-and **T2_P3** are assigned to *C2**. You can see that this algorithm can ensure
+**T2_P1**, and **T2_P2** are assigned to **C1** (consumer 1) whereas **T1_P3**,
+and **T2_P3** are assigned to **C2**. You can see that this algorithm can ensure
 evenly distribution in one topic but across the topics the distribution is not
 evenly
 ### Round Robin
