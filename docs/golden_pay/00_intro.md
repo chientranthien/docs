@@ -10,5 +10,4 @@ serving as an invaluable platform for me to acquire, hone, and apply my
 technical skills and knowledge, with the aim of continually enhancing my
 expertise in this domain.
 
-- Domain: https://goldenpay.chientran.info
 - Github: https://github.com/chientranthien/goldenpay
