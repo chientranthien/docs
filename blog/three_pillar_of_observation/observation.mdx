@@ -1,0 +1,127 @@
+---
+slug: three_pilar_of_observation
+title: Three Pillars of Observation
+authors: chien 
+date: 2024-05-04
+tags: [logging,tracing,monitoring,observation]
+---
+
+## Introduction
+
+In the realm of computer science, particularly when it comes to understanding
+complex systems, we rely on the concept of observability. It essentially boils
+down to gaining a deep understanding of a system's internal state by examining
+the data it generates externally. This is achieved through the three pillars of
+observability: **Logs**, **Metrics**, and **Traces**.
+
+The true power lies in using all three pillars together. Logs provide the
+intricate details, metrics offer a performance overview, and traces map out the
+By combining this data, you gain a comprehensive understanding
+of your system's inner workings, enabling you to diagnose problems faster,
+optimize performance, and ensure the overall health and reliability of your
+system.
+
+In this blog, I'm gonna describe the definition of these three pillars again.
+But I'm gonna tell my past experiences when I'm working with these three pillars
+
+:::note
+The introduction is written with the help of [Gemini](https://gemini.google.com/)
+:::
+
+## Logs
+
+I've been working on several companies and each of them have different
+approaches for logging. But in general, I can concise them in two approaches
+which are just simply write logs to files, and have a logging system that
+include log collector, log storage, and log search portal. In the following, I'm
+gonna describe these two approach
+
+### Approach 1: Just Simply Write Logs to Files
+
+You can just write every things we want to the log files, and the log messages is
+just simply plain text that contains necessary information such as date, time,
+error messages, caller, etc. And if anyone want to check the logs they
+just simply ssh into the servers and grep logs directly. It's simple but it is
+really painful if you have many servers and have to ssh into them one by one to
+find the logs and some times you may have very silly issues like some developers
+execute an expensive grep and affect the performance of the services
+
+Another issue is usually the server to serve users traffic use the fast but
+expensive SSD which usually mean that you don't have too much storage to store
+the logs. Hence, it can only store the logs of a several days. So one of the solution
+is to backup the files to other servers that have bigger storage. And usually
+they use RAID to maximize the storage, and developers can interact with the
+files as in they're the same machine. Even though it can help developers to
+trace the old logs. But from my experience, you just wish you don't have to find
+logs on this server because it's extremely slow
+
+### Approach 2: Logging System
+:::info
+There are many way to set up a logging system. But in this blog, I'll only
+describe one of the most simple way
+:::
+
+Similar to approach 1, you also write logs to files. but log collectors write to log storage,
+
+You can still write plain text to the log files like in approach 1. But in order
+to help the logging storage to index your logs better. You can consider to write
+structure logs such as write logs in JSON format, or separates your information
+by |
+
+You may face challenging when deploying your log collectors when your company
+adopt many approaches to deploy their services such as using physical machine,
+K8S, Virtual machine, Docker, etc. so make sure that your log collector can work
+with all of them
+
+
+Log storage is a DB, or search engine that is optimized for heavy read, and
+search performance. But usually their write performance is quite bad. Hence, you
+should make sure that you don't kill your log storage by writing too much data
+at a same time
+
+Log portal is where users can search their logs by sending users requests to the
+logging storage. One of the major issue of the logging portal is that the syntax
+of the logging storage is not very user friendly. Hence, normally the logging
+portal has a more user friendly and closer to human language
+
+
+## Traces
+Approach 1: generate trace Id
+
+Imagine there is an user report an issue of their transaction with you. If
+you're lucky you can find the logs by their user_id, or transaction_id. But
+sometimes it's more complicated than that because user may make multiple
+requests. Hence, it may have a lot of logs related to their user_id, and
+transaction_id. And it's even more complicated if your system is a microservices
+system where the number of logs for a single user request can be a lot more.
+
+So one of the solution is one of your gateway can generate a trace id before
+passing it down the requests to the business services. And the business services
+need to make sure they have to write the trace id in their logs and always keep
+passing down the trace id to their dependencies
+
+:::note
+           TRACE ID         SPAN ID           PARENT ID
+SERVICE M  e4bbb7c0f6a2ff07.a5f47e9fced314a2:694eb2f05b8fd7d1
+
+The above is one of the example of the trace id (source
+[twitter](https://twitter.github.io/finagle/docs/com/twitter/finagle/tracing/TraceId.html)
+:::
+
+Approach 2: Use distributed tracing
+- log
+- jager: push
+- trace with span
+:::note
+There are many way to deploy your distributed tracing. I'm gonna describe the
+most simple one
+:::
+## Metrics
+I've been using a few tech stack including [graphite](https://graphiteapp.org/),
+[New Relic](https://newrelic.com/), and [Prometheus](https://prometheus.io/).
+But [Prometheus](https://prometheus.io/) is the most recently used and the one I
+love the most. So I'm gonna describe how we can metrics with [Prometheus](https://prometheus.io/).
+
+- Storage
+- Scraping
+- Monitoring portal
