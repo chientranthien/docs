@@ -49,6 +49,8 @@ const config = {
             'https://github.com/chientranthien/docs/tree/master/',
         },
         blog: {
+          blogSidebarTitle: 'All posts',
+          blogSidebarCount: 'ALL',
           showReadingTime: true,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
@@ -67,8 +69,8 @@ const config = {
     ({
       // Replace with your project's social card
       mermaid: {
-      theme: {light: 'base', dark: 'forest'},
-    },
+        theme: {light: 'base', dark: 'forest'},
+      },
       image: 'img/docusaurus-social-card.jpg',
       navbar: {
         title: 'Chien\'s site',
