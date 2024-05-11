@@ -1,0 +1,113 @@
+---
+slug: type_of_load_balancer
+title: Types Of Load Balancer
+authors: chien
+date: 2024-05-12
+tags: [ load_balancer ]
+---
+
+## Introduction
+
+Early in my career as a junior developer, I was asked during an interview how
+I'd scale an application to handle high query-per-second (QPS) loads. My initial
+solution was to deploy multiple application instances behind a load balancer to
+distribute traffic. The interviewer then challenged me with a follow-up
+question: what happens when the load balancer itself becomes overwhelmed by high
+traffic? At that time, I didn't have an answer. However, I've since learned a
+valuable approach that I'm excited to share in this blog post.
+
+## The OSI Model: A Quick Refresher
+
+Before diving in, a quick recap of the OSI model, a seven-layer framework for
+networking, is helpful. Each layer handles specific communication functions:
+
+- **Layer 3 (Network Layer)**: Deals with routing packets based on IP addresses.
+- **Layer 4 (Transport Layer)**: Manages reliable data transfer protocols like
+  TCP
+  and UDP.
+- **Layer 7 (Application Layer)**: Handles application-specific protocols like
+  HTTP,
+  FTP, and SMTP.
+
+## L7 Load Balancer
+
+<div class="text--center">
+<img src="/img/load_balancer/l7.png" width="400" />
+</div>
+
+**L7 load balancers** inspects incoming requests, analyzing data like URLs, headers, and
+cookies.
+This allows them to make sophisticated decisions based on application logic. L7
+balancers can route traffic based on user logins, content type, or even perform
+health checks on servers before sending requests.
+
+While offers efficiency benefits, **L7 load balancers** do come with a potential
+drawbacks:
+
+- **L7 load balancers** need to inspect application-level data in each request, adding
+  complexity and potentially introducing latency.
+- **L7 load balancers** need to open a new connection to the applications per client
+connection. Hence, making it can handle relatively low number of connections
+
+That's why to achieve high availability for **L7 load balancers**, they are often
+deployed behind **L4 load balancers**
+
+## L4 Load Balancer
+
+<div class="text--center">
+<img src="/img/load_balancer/l4.png" width="550"/>
+</div>
+
+Operating at the transport layer, **L4 load balancers** manage traffic flow based on
+ports (think HTTP port 80 or HTTPS port 443). They analyze source and
+destination ports, making them ideal for distributing traffic across web servers
+efficiently.
+
+Unlike **L7 load balancers**, **L4 load balancers** operate at a lower level and don't
+examine application-specific details within requests. And **L4 load balancers** are
+normally pass-through balancers, forwarding entire TCP connections without
+terminating them. This streamlined approach allows **L4 load balancers** to handle
+significantly higher volumes of traffic and connections compared to their L7
+counterparts
+
+While a single **L4 load balancer**improves availability for the L7 load balancer
+behind it, it itself becomes a single point of failure. To address this, we can
+leverage L3 switches with features like Virtual Router Redundancy Protocol
+(VRRP) or Border Gateway Protocol(BGP) to create redundant L4 load balancer
+configurations. This eliminates the single point of failure and ensures
+continued traffic distribution even if a single **L4 load balancer** fails.
+
+pen_spark
+
+## L3 Switch 
+
+<div class="text--center">
+<img src="/img/load_balancer/l3.png" width="700"/>
+</div>
+
+Layer 3 switches, also known as multi-layer switches, operate in the network
+layer or the "layer 3" of the OSI model. These switches process and transmit
+data packets based on the IP address of the source and destination devices.
+
+By handling some routing functions within the switch itself, L3 switches can
+improve network performance compared to relying solely on separate routers for
+all routing needs
+
+:::info
+Different switch vendors and models will have varying feature sets. For example:
+some high-end L3 switches might offer BGP support
+:::
+
+## Outro
+You can ensure the high availability of your system by using multiple layer of
+load balancers on different OSI layer. But usually to make a high availability
+system it's a combination of many solutions such as client load balancing, DNS
+load balancing, CDN, etc
+
+## References
+
+In researching this blog post, I came across an excellent and comprehensive
+resource  [Introduction to modern network load balancing and
+proxying](https://blog.envoyproxy.io/introduction-to-modern-network-load-balancing-and-proxying-a57f6ff80236?gi=fcd13cbb0ce0#:~:text=The%20L4%20load%20balancer%20makes,(RPS)%20over%20its%20connection)
+This article provided valuable insights into the concept of pass-through load
+balancers, which are a key component of high-availability architectures.
