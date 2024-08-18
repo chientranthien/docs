@@ -1,0 +1,61 @@
+---
+slug: mysql-locking
+title: MySQL InnoDB Locking
+authors: chien 
+date: 2024-08-17
+tags: [mysql]
+---
+
+## Introduction
+
+Many times I ask the candidates during the interview how to avoid race condition
+with MySQL, they answered that they would set the isolation level to
+`Serializable` so it will enable locking. It seems some
+
+If you have a MySQL InnoDB table called order_tab that contains the data of the orders.
+
+## MySQL InnoDB Locking
+The following is the definition of type of locks  and the compatibility table from [MySQL doc](https://dev.mysql.com/doc/refman/8.4/en/innodb-locking.html)
+
+:::info
+InnoDB implements standard row-level locking where there are two types of locks, shared (S) locks and exclusive (X) locks.
+
+- A shared (S) lock permits the transaction that holds the lock to read a row.
+- An exclusive (X) lock permits the transaction that holds the lock to update or delete a row.
+
+InnoDB supports multiple granularity locking which permits coexistence of row
+locks and table locks. For example, a statement such as LOCK TABLES ... WRITE
+takes an exclusive lock (an X lock) on the specified table. To make locking at
+multiple granularity levels practical, InnoDB uses intention locks. Intention
+locks are table-level locks that indicate which type of lock (shared or
+exclusive) a transaction requires later for a row in a table. There are two
+types of intention locks:
+
+- An intention shared lock (IS) indicates that a transaction intends to set a shared lock on individual rows in a table.
+- An intention exclusive lock (IX) indicates that a transaction intends to set an exclusive lock on individual rows in a table.
+:::
+![locking_1](./locking_1.png)
+
+
+One of the reason why MySQL needs intention locks is because of the performance.
+But it's used internal by MySQL and you're rarely need to care about them.
+Hence, mostly you only need to care about this compatibility table
+![locking_2](./locking_2.png)
+
+## How to acquire a lock
+In order to acquire X lock explicitly you can use `Select ... For Update`
+For example: if you want to acquire the X lock for the order with the id equal
+to 1 you can use this query `Select * From order_tab Where id = 1 For Update`.
+But the X lock can also be acquired via the Update, Delete, or Insert on Update
+query
+
+:::note
+In the example above, it acquire the lock for only 1 row it's because id is primary key. Hence
+:::
+
+In order to acquire the S lock you can use the `Select ... Lock In Share Mode`.
+For example if you want to acquire an S lock for the order with the id equal to
+1 you can use this query `Select * From order Where id = 1 Lock In Share Mode`
+
+## Outro
+Hopefully,
