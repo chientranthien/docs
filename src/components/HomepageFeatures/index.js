@@ -18,11 +18,11 @@ const FeatureList = [
     ),
   },
   {
-    title: 'My Learning',
+    title: 'Blog',
     Svg: require('@site/static/img/my_learning.svg').default,
     description: (
       <>
-          <code>My Learning</code> serves as the dedicated space where I wholeheartedly and
+          <code>Blog</code> serves as the dedicated space where I wholeheartedly and
           enthusiastically engage in the art of knowledge dissemination,
           allowing me to share my profound insights, experiences, and
           discoveries acquired throughout my enriching learning journey, thus

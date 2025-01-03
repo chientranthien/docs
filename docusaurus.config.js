@@ -85,7 +85,7 @@ const config = {
             position: 'left',
             label: 'GoldenPay'
           },
-          {to: '/blog', label: 'My Learning', position: 'left'},
+          {to: '/blog', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/chientranthien/docs',
             label: 'GitHub',
@@ -104,7 +104,7 @@ const config = {
                 to: '/docs/golden_pay/intro',
               },
               {
-                label: 'My Learning',
+                label: 'Blog',
                 to: '/blog',
               },
             ],
