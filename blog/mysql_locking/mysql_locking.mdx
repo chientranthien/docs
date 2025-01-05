@@ -82,13 +82,14 @@ Similarly, you can acquire an S lock with the `SELECT ... LOCK IN SHARE MODE` qu
 For instance, to obtain an S lock on the order with an ID of 1, you would execute the follow query
 
 ```sql
-SELECT * FROM order WHERE id = 1 LOCK IN SHARE MODE;
+SELECT * FROM order_tab WHERE id = 1 LOCK IN SHARE MODE;
 ```
 
 :::note
 In the examples above, the lock is acquired for only one row because the id
 column is the primary key. This aligns with the general rule of InnoDB locking:
-it acquires locks on the specific rows that it needs to read
+it acquires locks on the specific rows that it needs to read. If there is no index
+on the id column and MySQL has to do a table scan, it my block all of the rows of order_tab table
 :::
 
 ## Example
