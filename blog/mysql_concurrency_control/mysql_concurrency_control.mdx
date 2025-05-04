@@ -1,0 +1,99 @@
+---
+slug: mysql-concurrency-control
+title: Concurrency Control With MySQL
+authors: chien
+date: 2025-05-4
+tags: [ mysql, concurrency ]
+---
+
+## Concurrency Control with MySQL: A Practical Guide
+
+In high-performance applications, maintaining data integrity in the face of
+concurrent access is both a necessity and a challenge. MySQL, as one of the most
+widely used relational databases, provides several mechanisms to handle
+concurrency, but understanding how and when to use them effectively is critical.
+
+In this post, we’ll explore **pessimistic** and **optimistic** concurrency
+control strategies with MySQL, drawn from real-world insights and practical
+architecture considerations.
+
+## Why Concurrency Control Matters
+
+Concurrency issues arise when multiple transactions access the same data
+simultaneously. Without proper control, this can lead to classic problems such
+as: wo transactions overwrite each other’s changes.
+
+
+## Pessimistic vs Optimistic Concurrency
+
+Concurrency control mechanisms generally fall into two categories:
+
+### 🔒 Pessimistic Locking
+
+Pessimistic concurrency assumes that conflicts are likely. It **locks** data
+before accessing it, ensuring only one transaction can operate on the data at a
+time. This is achieved using:
+
+* `SELECT ... FOR UPDATE`: Acquires an **exclusive lock** on selected rows.
+* `LOCK IN SHARE MODE`: Acquires a **shared lock**, allowing concurrent reads
+  but not writes.
+
+#### Example: Safe Decrement with Pessimistic Locking
+
+```sql
+START TRANSACTION;
+SELECT stock FROM items WHERE id = 42 FOR UPDATE;
+UPDATE items SET stock = stock - 1 WHERE id = 42;
+COMMIT;
+```
+
+This pattern is useful in inventory management to prevent overselling.
+
+**Pros**:
+
+* Guarantees safety in high-contention scenarios.
+* Easy to understand.
+
+**Cons**:
+
+* Can cause lock contention and reduced throughput.
+* Risk of deadlocks if not managed properly.
+
+### ⚙️ Optimistic Locking
+
+Optimistic concurrency assumes conflicts are rare. Instead of locking data
+preemptively, it verifies that no changes have occurred during the transaction
+before committing.
+
+Typically, this involves a **version column** in your table:
+
+#### Example: Version-based Update
+
+```sql
+UPDATE items
+SET quantity = quantity - 1,
+    version  = version + 1
+WHERE id = 42 AND version = 5;
+```
+
+If another transaction modified the row and incremented `version`, this update
+will fail and can be retried.
+
+**Pros**:
+
+* Better performance under low contention.
+* Avoids blocking other transactions.
+
+**Cons**:
+
+* May require retries.
+* Can lead to unexpected failures if not handled correctly.
+
+---
+
+## Choosing the Right Strategy
+
+| Strategy    | Best For                                               | Trade-offs                                     |
+| ----------- | ------------------------------------------------------ | ---------------------------------------------- |
+| Pessimistic | High contention scenarios (inventory, booking systems) | Blocks other transactions, potential deadlocks |
+| Optimistic  | Read-heavy workloads with rare conflicts               | Requires retries, more complex logic           |
