@@ -120,10 +120,6 @@ const config = {
                 label: 'Linkedin',
                 href: 'https://www.linkedin.com/in/chien-tran-thien-529360137/',
               },
-              {
-                label: 'Discord',
-                href: 'https://discord.gg/anz2mwFsCD',
-              },
             ],
           },
         ],
