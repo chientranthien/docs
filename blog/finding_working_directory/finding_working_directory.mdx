@@ -1,0 +1,85 @@
+---
+slug: finding_working_directory
+title: How To Find Your Project's Working Directory
+authors: chien
+date: 2025-05-19
+tags: [ shell, bash ]
+---
+
+## 📁 How to Reliably Find Your Project's Working Directory in Shell Scripts
+
+When you’re writing shell scripts to automate things like testing, building, or
+deployment, it’s common to place them in a `scripts/` folder. But sometimes
+those scripts need to execute commands relative to the *project root*. This
+introduces a small but annoying problem: how do you reliably find your way
+*back* to the project root, regardless of where the script is executed from?
+
+### 🧩 The Problem
+
+Let’s say you have a typical Go project structure:
+
+```
+my-project/
+├── go.mod
+├── main.go
+└── scripts/
+    └── test.sh
+```
+
+In `scripts/test.sh`, you might want to run:
+
+```bash
+go test ./...
+```
+
+But `go test ./...` only works correctly if it's run from the *project root*,
+where `go.mod` is located. Running it from within the `scripts/` folder will
+cause it to miss packages.
+
+One naive solution is to instruct users to `cd ..` into the root directory
+before running the script. But that’s fragile and error-prone.
+
+### ✅ Solution 1: Use Git to Find the Project Root
+
+If your project is in a Git repository, this one-liner gives you the root
+directory:
+
+```bash
+PROJECT_ROOT=$(git rev-parse --show-toplevel)
+```
+
+It’s simple and elegant. But it only works if:
+
+* You’re inside a Git repository
+* You don’t have submodules that complicate the directory layout
+
+### ✅ Solution 2: Use Script Path Detection
+
+For a Git-agnostic solution, you can calculate the project root by using the
+script’s path itself. This is especially helpful for scripts located in the
+`scripts/` directory:
+
+```bash
+# Get the directory where the current script is located
+SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Go up one level to reach the project root
+PROJECT_DIR="$(cd "$SCRIPTS_DIR/.." && pwd)"
+
+# Use the project directory as the working dir
+cd "$PROJECT_DIR"
+go test ./...
+```
+
+This pattern ensures that no matter where you invoke the script from, it will
+always compute the correct project root relative to its own location.
+
+### 🛠️ Which One Should You Use?
+
+| Method                  | Pros                         | Cons                                |
+|-------------------------|------------------------------|-------------------------------------|
+| `git rev-parse`         | Simple, fast                 | Requires Git; fails in CI sometimes |
+| Script path calculation | More robust, Git-independent | Slightly more verbose               |
+
+Use the Git method if your workflow is always Git-based. Use the second if you
+want broader compatibility or better CI behavior.
