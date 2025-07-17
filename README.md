@@ -2,6 +2,17 @@
 
 This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
 
+## About This Project
+
+This is my personal blog and documentation site with two main categories:
+
+- **docs/golden_pay/**: Contains all documentation related to my personal project Golden Pay, including:
+  - Change logs
+  - Architecture documentation  
+  - Feature specifications
+
+- **blog/**: Contains my personal blog posts covering various technical topics and insights
+
 ### Installation
 
 ```

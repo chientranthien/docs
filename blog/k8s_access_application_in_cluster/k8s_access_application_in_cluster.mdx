@@ -1,0 +1,365 @@
+---
+slug: k8s_access_application_in_cluster
+title: K8s - Accessing Applications in a Cluster from Outside
+authors: chien
+date: 2025-07-17
+tags: [ k8s ]
+---
+
+# Accessing Applications in a Kubernetes Cluster from Outside
+
+One of the most common challenges when deploying applications to Kubernetes is figuring out how to make them accessible from outside the cluster. Whether you're exposing a web application to end users, providing API access to external clients, or need to access your application for development and testing, Kubernetes offers several mechanisms to bridge the gap between your cluster-internal applications and the external world.
+
+## The Challenge: Breaking Out of the Cluster
+
+By default, Kubernetes pods run in an isolated network environment:
+- Pods get cluster-internal IP addresses (usually in ranges like 10.x.x.x or 172.x.x.x)
+- These IPs are only routable within the cluster
+- External clients cannot directly reach pod IPs
+- This isolation is intentional for security and network management
+
+To make applications accessible externally, we need to use Kubernetes networking abstractions that create a bridge between the internal cluster network and the external world.
+
+## Methods for External Access
+
+### 1. NodePort: Simple Direct Access
+
+NodePort is the most straightforward way to expose applications externally by opening a port on every cluster node.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: web-app
+  ports:
+    - port: 80          # Internal cluster port
+      targetPort: 8080  # Pod port
+      nodePort: 30080   # External port on nodes
+```
+
+**How it works:**
+- Kubernetes opens port 30080 on every cluster node
+- External traffic to `<any-node-ip>:30080` gets routed to your pods
+- Works even if the pod is running on a different node
+
+**Access your application:**
+```bash
+# Get node IPs
+kubectl get nodes -o wide
+
+# Access via any node
+curl http://<node-ip>:30080
+```
+
+**Pros:**
+- Simple to set up and understand
+- Works in any environment (cloud, on-premise, local)
+- No additional infrastructure required
+
+**Cons:**
+- Requires knowledge of node IPs
+- Limited to ports 30000-32767 (by default)
+- No load balancing across nodes from external perspective
+- Not ideal for production (exposes nodes directly)
+
+**Best for:** Development, testing, small deployments, or when you need quick external access.
+
+### 2. Ingress: Advanced HTTP/HTTPS Routing
+
+Ingress provides sophisticated Layer 7 (HTTP/HTTPS) routing and is the most feature-rich option for web applications.
+
+First, you need a regular ClusterIP service:
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app-service
+spec:
+  selector:
+    app: web-app
+  ports:
+    - port: 80
+      targetPort: 8080
+```
+
+Then create an Ingress resource:
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-app-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+    - hosts:
+        - myapp.example.com
+      secretName: myapp-tls
+  rules:
+    - host: myapp.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-app-service
+                port:
+                  number: 80
+```
+
+**Advanced routing example:**
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: multi-service-ingress
+spec:
+  rules:
+    - host: api.example.com
+      http:
+        paths:
+          - path: /users
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 80
+          - path: /orders
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 80
+    - host: admin.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: admin-dashboard
+                port:
+                  number: 80
+```
+
+**Key capabilities:**
+- **Host-based routing**: Different domains to different services
+- **Path-based routing**: Different URL paths to different services  
+- **TLS termination**: Handle SSL certificates at the ingress level
+- **Cost efficiency**: One load balancer serves multiple applications
+
+**Check ingress status:**
+```bash
+kubectl get ingress web-app-ingress
+# NAME              CLASS   HOSTS               ADDRESS         PORTS     AGE
+# web-app-ingress   nginx   myapp.example.com   203.0.113.100   80, 443   5m
+```
+
+**Pros:**
+- Very cost-effective (one load balancer for many services)
+- Advanced routing capabilities
+- Built-in TLS support
+- Standard HTTP features (redirects, rewrites, etc.)
+
+**Cons:**
+- Requires ingress controller installation
+- Only works for HTTP/HTTPS traffic
+- More complex setup
+
+**Best for:** Production web applications, microservices architectures, when you need advanced HTTP routing.
+
+### 3. Port Forwarding: Development and Debugging
+
+Port forwarding creates a secure tunnel from your local machine to applications in the cluster.
+
+```bash
+# Forward local port 8080 to a pod's port 80
+kubectl port-forward pod/web-app-pod-12345 8080:80
+
+# Forward to a service (recommended - automatically handles pod failures)
+kubectl port-forward service/web-app-service 8080:80
+
+# Forward to a deployment
+kubectl port-forward deployment/web-app 8080:80
+
+# Forward with specific local IP (bind to all interfaces)
+kubectl port-forward --address 0.0.0.0 service/web-app-service 8080:80
+```
+
+**Access your application:**
+```bash
+# Local access
+curl http://localhost:8080
+
+# If you used --address 0.0.0.0, others can access via your IP
+curl http://<your-machine-ip>:8080
+```
+
+**Advanced port forwarding:**
+```bash
+# Multiple ports
+kubectl port-forward service/web-app-service 8080:80 9090:9090
+
+# Background process
+kubectl port-forward service/web-app-service 8080:80 &
+
+# Stop background port forwarding
+pkill -f "kubectl port-forward"
+```
+
+**Pros:**
+- Secure (uses kubectl authentication)
+- No cluster configuration changes needed
+- Works from anywhere you have kubectl access
+- Great for development and debugging
+
+**Cons:**
+- Only works while the command is running
+- Single user access
+- Not suitable for production
+- Requires kubectl to be configured
+
+**Best for:** Development, debugging, accessing admin interfaces, database connections, testing.
+
+### 4. Telepresence: Local Development with Remote Clusters
+
+Telepresence allows you to run a service locally while connecting it seamlessly to a remote Kubernetes cluster, creating a hybrid development environment.
+
+**How it works:**
+- Telepresence creates a network bridge between your local machine and the cluster
+- Your local service can access cluster services as if it were running inside the cluster
+- You can intercept traffic meant for a specific service and redirect it to your local development version
+
+**Installation:**
+```bash
+# macOS
+brew install datawire/blackbird/telepresence
+
+# Linux
+sudo curl -fL https://app.getambassador.io/download/tel2/linux/amd64/latest/telepresence -o /usr/local/bin/telepresence
+sudo chmod a+x /usr/local/bin/telepresence
+
+# Windows (using PowerShell as Administrator)
+# Download from https://app.getambassador.io/download/tel2/windows/amd64/latest/telepresence.exe
+```
+
+**Basic usage:**
+```bash
+# Connect to cluster (creates background daemon)
+telepresence connect
+
+# Check connection status
+telepresence status
+
+# List available services for intercept
+telepresence list
+
+# Disconnect
+telepresence quit
+```
+
+**Service Intercept Example:**
+Let's say you have a `user-service` running in your cluster that you want to develop locally:
+
+```bash
+# Start intercepting traffic to user-service
+telepresence intercept user-service --port 8080:80
+
+# Now run your local version of the service
+go run main.go  # or python app.py, npm start, etc.
+
+# Your local service at localhost:8080 now receives traffic
+# that would normally go to user-service in the cluster
+```
+
+**Advanced intercept with headers:**
+```bash
+# Only intercept requests with specific headers
+telepresence intercept user-service --port 8080:80 \
+  --http-header x-dev-user=john
+
+# Only requests with "x-dev-user: john" header go to your local service
+# Other requests continue to the cluster service
+```
+
+**Environment variable inheritance:**
+```bash
+# Get environment variables from the cluster service
+telepresence intercept user-service --port 8080:80 --env-file .env
+
+# Your .env file now contains all environment variables from the cluster
+cat .env
+# DATABASE_URL=postgres://cluster-db:5432/app
+# REDIS_URL=redis://cluster-redis:6379
+# API_KEY=secret-from-cluster
+```
+
+**Pros:**
+- Develop locally with access to full cluster environment
+- No need to rebuild/redeploy to test changes
+- Access to cluster services, databases, and configurations
+- Selective traffic routing (intercept only specific requests)
+- Fast iteration cycle
+- Real environment testing without affecting other developers
+
+**Cons:**
+- Requires installation and setup
+- Can be complex for beginners
+- Network connectivity dependent
+- May have performance overhead
+- Requires cluster permissions
+
+**Best for:** 
+- Local development of microservices
+- Testing with real cluster data and services
+- Debugging production-like environments
+- Collaborative development without conflicts
+- API development that depends on other cluster services
+
+**Comparison with Port Forwarding:**
+
+| Feature | Port Forwarding | Telepresence |
+|---------|----------------|--------------|
+| **Setup complexity** | Simple | Moderate |
+| **Bi-directional access** | Local → Cluster only | Local ↔ Cluster |
+| **Environment variables** | Manual | Automatic |
+| **Traffic routing** | All or nothing | Selective |
+| **Multiple services** | Multiple commands | Single connection |
+| **Development workflow** | View/test only | Full development |
+
+## Choosing the Right Method
+
+| Use Case | Method | Why |
+|----------|--------|-----|
+| **Local development (viewing)** | Port forwarding | Secure, temporary, no cluster changes |
+| **Local development (coding)** | Telepresence | Full development workflow with cluster integration |
+| **Team development** | NodePort | Simple setup, temporary external access |
+| **Production web app** | Ingress | Cost-effective, advanced features, HTTPS |
+| **Production API** | Ingress or NodePort | Ingress for HTTP APIs, NodePort for others |
+| **Legacy applications** | NodePort | Simple setup, works with any protocol |
+| **Microservices** | Ingress | Single entry point, path-based routing |
+| **Database access** | Port forwarding | Secure, temporary |
+| **Microservice development** | Telepresence | Test locally with real cluster dependencies |
+
+## Conclusion
+
+Accessing applications from outside a Kubernetes cluster requires choosing the right approach based on your specific needs:
+
+- **Development/Testing**: Use port forwarding for quick access, or Telepresence for full development workflows
+- **Simple external access**: NodePort for basic scenarios
+- **Production web applications**: Ingress for advanced HTTP routing and TLS
+- **Production non-HTTP services**: NodePort with proper firewall configuration
+- **Complex routing needs**: Ingress with advanced path and host-based routing
+- **Local microservice development**: Telepresence for seamless cluster integration
+
+Remember to always consider security implications, implement proper TLS for production workloads, and use network policies to control traffic flow. Start simple with NodePort or port forwarding for basic access, use Telepresence for active development, then graduate to Ingress as your requirements become more sophisticated.
+
+The key is understanding that each method serves different use cases, and often you'll use multiple approaches even within the same cluster depending on the specific requirements of each application.
