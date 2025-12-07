@@ -1,0 +1,451 @@
+---
+slug: dlock
+title: How to Build a Distributed Lock Library on Top of a Single Redis
+authors: chien
+date: 2025-12-07
+tags: [ dloc, redis ]
+---
+
+
+Distributed locking sounds intimidating, but most real systems want something very simple:
+
+> “Make sure **only one worker** in the whole system is doing this particular thing right now.”
+
+This post is a practical guide to building that primitive yourself: a **distributed mutex** implemented using **a single Redis cluster**.
+
+The focus here is:
+
+* Designing a clean lock library API (Acquire / TryAcquire / Release / Renew / KeepAlive)
+* Implementing it on top of Redis with **tokens, TTLs, and Lua scripts**
+* Understanding the **trade-offs against other backends** (RDBMS, Redlock, etcd)
+* Briefly touching on more advanced lock types (xlock/slock) and a compatibility table
+  — but keeping the implementation discussion centered on the simple mutex
+
+By the end, you should have a clear mental model and enough details to implement your own library in Go, Java, or whatever language you prefer.
+
+---
+
+## 1. What problem is this library solving?
+
+In a single process, `mutex.Lock()` gives mutual exclusion. Once you have **multiple processes, containers, or services** handling the same resource, you need coordination at a different level.
+
+Common use cases:
+
+* **Idempotent processing**
+
+    * Ensure only one worker processes a given order/payment/message at a time, despite retries or duplicated messages.
+
+* **“Only one instance runs this job”**
+
+    * Scheduled jobs deployed in multiple pods, but only one instance should perform the heavy work.
+
+* **Exclusive access to a shared resource**
+
+    * Expensive cache recompute, maintenance tasks, rate-limited APIs, etc.
+
+All of these can be expressed as:
+**“Let me acquire a lock on key K. If I succeed, I know nobody else is holding that lock at the same time.”**
+
+The rest is detail.
+
+---
+
+## 2. Why Redis, and why a single Redis?
+
+There are several ways to store lock state. Redis isn’t the only option, but it’s a very good one.
+
+### 2.1 Redis vs RDBMS
+
+Relational databases can be used for locking (lock tables, row locks, etc.), but:
+
+* Databases are usually **busy** handling application queries; you risk adding contention.
+* They don’t have simple, native **TTL per lock** built in.
+* Latency often isn’t as good as an in-memory cache.
+
+Redis, by contrast:
+
+* Is **in-memory** and fast.
+* Has first-class key **expiration (TTL)**.
+* Offers **conditional SET** operations (e.g. `SET key value NX PX 10000`) that map almost directly to the notion of “try to acquire the lock with a lease”.
+
+### 2.2 Single Redis vs Redlock
+
+Redlock is an algorithm that uses **multiple independent Redis instances** and acquires locks on a majority of them to survive some node failures.
+
+Rough trade-off:
+
+* **Single Redis backend**
+
+    * Implementation is simple.
+    * Operationally straightforward.
+    * Works very well when your Redis itself is deployed in a highly available configuration.
+* **Redlock (multiple Redis masters)**
+
+    * More complex to operate and reason about.
+    * Useful if you really need to tolerate individual Redis node failures or partitions as part of your lock correctness story.
+
+A lot of applications don’t need the extra complexity: a **single Redis cluster** that is already HA is more than enough.
+
+### 2.3 Redis vs etcd
+
+etcd is built for strongly consistent coordination, and you can build robust locks on it. But:
+
+* It’s heavier operationally and conceptually.
+* Latency may be higher.
+* Not everyone already runs etcd.
+
+Redis tends to be easier to adopt for application-level locking. If you already rely on etcd for configuration/coordination, it might make sense to build locks there; otherwise, Redis is a very practical choice.
+
+---
+
+## 3. The core idea: token + TTL
+
+The design is surprisingly small. A lock becomes:
+
+* A **Redis key** derived from your logical lock name (e.g. `"lock:order:123"`).
+* A **random token** stored as the value.
+* A **TTL** attached to the key.
+
+The rules:
+
+* A client that successfully `SET`s this key with `NX` (only if not exists) “wins” the lock.
+* The Redis TTL makes the lock a **lease**:
+
+    * If the holder crashes, the key eventually disappears and others can acquire the lock.
+* The random token ensures only the current holder can safely release or extend the lock.
+
+Everything else—Acquire, Release, Renew, KeepAlive—is just logic around that.
+
+---
+
+## 4. Redis primitives you need
+
+You really only need a few commands:
+
+1. **SET with NX and TTL**
+
+   ```text
+   SET key value NX PX <ttl_ms>
+   ```
+
+    * `NX` → only set if key doesn’t exist
+    * `PX` → TTL in milliseconds (use `EX` if you want seconds instead)
+
+2. **GET**
+
+    * Read the current value (the token).
+
+3. **PEXPIRE** / **EXPIRE**
+
+    * Extend the TTL of a key.
+
+4. **Lua scripts (`EVAL`)**
+
+    * For atomic “compare-and-delete” and “compare-and-extend” operations.
+
+This is enough to build a robust distributed mutex.
+
+---
+
+## 5. Designing the library API
+
+Before diving into Redis details, sketch the most ergonomic API you want your application developers to use.
+
+For example, in Go-like pseudocode:
+
+```go
+type Lock interface {
+    Release(ctx context.Context) error
+    Renew(ctx context.Context, ttl time.Duration) error
+}
+
+type Client interface {
+    Acquire(ctx context.Context, key string, ttl time.Duration) (Lock, error)
+    TryAcquire(ctx context.Context, key string, ttl time.Duration) (Lock, error)
+}
+```
+
+Usage might look like:
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+defer cancel()
+
+lock, err := client.Acquire(ctx, "order:123", 10*time.Second)
+if err != nil {
+    return err // could be timeout, backend error, etc.
+}
+defer lock.Release(context.Background())
+
+// critical section for "order:123" goes here
+processOrder(ctx, 123)
+```
+
+Design goals:
+
+* **Context-aware** (or equivalent in your language): allows timeouts and cancellations.
+* **Blocking `Acquire` with retries**.
+* **Non-blocking `TryAcquire`** for “do it only if you can get the lock immediately”.
+* A simple `Lock` interface that hides the token and key details from callers.
+
+---
+
+## 6. Implementing Acquire with Redis
+
+Algorithm for `Acquire`:
+
+1. Generate a **random token** (e.g. UUID).
+2. Derive the Redis key for the logical lock, e.g. `"lock:"+key`.
+3. Loop until deadline:
+
+    * Run `SET key token NX PX ttl_ms`.
+    * If it returns success → you hold the lock; return a `Lock` handle.
+    * If it returns “key already exists” → someone else holds the lock; sleep briefly and retry.
+    * If Redis returns an error → depending on your policy, either retry or abort.
+
+Pseudocode:
+
+```go
+func (c *RedisClient) Acquire(ctx context.Context, key string, ttl time.Duration) (Lock, error) {
+    redisKey := "lock:" + key
+    token := randomToken()
+
+    for {
+        ok, err := c.setNXPX(ctx, redisKey, token, ttl)
+        if err != nil {
+            if ctx.Err() != nil {
+                return nil, ctx.Err()
+            }
+            // network/backend error: decide to retry or return error
+            return nil, err
+        }
+
+        if ok {
+            // acquired the lock
+            return &redisLock{
+                client: c,
+                key:    redisKey,
+                token:  token,
+                ttl:    ttl,
+            }, nil
+        }
+
+        // lock held by someone else
+        if ctx.Err() != nil {
+            return nil, ErrAcquireTimeout
+        }
+
+        time.Sleep(jitter(50 * time.Millisecond))
+    }
+}
+```
+
+`TryAcquire` is the same logic **without the loop**: you attempt once and either get the lock or not.
+
+---
+
+## 7. Releasing safely with Lua
+
+To release a lock safely, you must avoid the “stale deleter” problem:
+
+* Client A acquires lock, token `A`, TTL 10s.
+* A stalls, TTL expires.
+* Client B acquires lock, token `B`.
+* A finally calls `DEL key` and silently deletes B’s lock.
+
+To prevent this, Lock **must** store the token and only delete the key if the current value matches that token. Use Lua:
+
+```lua
+-- KEYS[1] = lock key
+-- ARGV[1] = expected token
+if redis.call("GET", KEYS[1]) == ARGV[1] then
+    return redis.call("DEL", KEYS[1])
+else
+    return 0
+end
+```
+
+In code:
+
+```go
+func (l *redisLock) Release(ctx context.Context) error {
+    _, err := l.client.eval(ctx, releaseScript, []string{l.key}, []string{l.token})
+    // You might inspect the result (1 or 0) for metrics or debugging,
+    // but from an API perspective Release() is safe either way.
+    return err
+}
+```
+
+Now:
+
+* If this instance still owns the lock, it is released.
+* If it doesn’t (expired, or taken over by someone else), the script does nothing.
+
+---
+
+## 8. Renewing the lock (extending the TTL)
+
+Sometimes the critical section runs longer than the initial TTL. Instead of guessing a huge TTL up front, you can **renew**.
+
+Renew operation:
+
+1. Ensure **this client** still holds the lock.
+2. If yes, extend the TTL.
+
+Again, use Lua:
+
+```lua
+-- KEYS[1] = lock key
+-- ARGV[1] = expected token
+-- ARGV[2] = new ttl in ms
+if redis.call("GET", KEYS[1]) == ARGV[1] then
+    return redis.call("PEXPIRE", KEYS[1], ARGV[2])
+else
+    return 0
+end
+```
+
+Code:
+
+```go
+func (l *redisLock) Renew(ctx context.Context, ttl time.Duration) error {
+    ttlMs := int(ttl / time.Millisecond)
+    res, err := l.client.eval(ctx, renewScript, []string{l.key}, []string{l.token, strconv.Itoa(ttlMs)})
+    if err != nil {
+        return err
+    }
+    if res.(int64) == 0 {
+        return ErrNotOwnerOrExpired
+    }
+    return nil
+}
+```
+
+You can build a **KeepAlive** helper on top:
+
+* A goroutine that periodically calls `Renew` when remaining TTL drops below some threshold.
+* If `Renew` fails or the context is cancelled, it stops and optionally notifies the caller.
+
+---
+
+## 9. Checking lock status (optional but handy)
+
+For tooling and debugging, it’s useful to be able to ask:
+
+* “Does **this** instance still own the lock?”
+* “Is this lock currently held by *someone*?”
+
+You can add methods like:
+
+```go
+func (l *redisLock) StillOwns(ctx context.Context) (bool, error) {
+    val, err := l.client.get(ctx, l.key)
+    if err != nil {
+        return false, err
+    }
+    if val == "" {
+        return false, nil
+    }
+    return val == l.token, nil
+}
+```
+
+Or a client-level method:
+
+```go
+func (c *RedisClient) IsLocked(ctx context.Context, key string) (bool, error) {
+    redisKey := "lock:" + key
+    val, err := c.get(ctx, redisKey)
+    if err != nil {
+        return false, err
+    }
+    return val != "", nil
+}
+```
+
+This is best-effort, not a strong guarantee (things can change between check and use), but useful for dashboards, CLIs, or logs.
+
+---
+
+## 10. Guarantees and failure modes
+
+A Redis-based mutex like this gives **lease-based mutual exclusion** with a few important characteristics:
+
+* **At most one holder at a time** (under normal conditions)
+
+    * `SET NX` + token checks + TTL keep ownership simple.
+* **Locks are not permanent**
+
+    * They expire after TTL if not renewed, allowing recovery from crashes.
+* **Stale holders cannot harm current owners**
+
+    * Releases and renewals are conditional on the token.
+
+But there are limits:
+
+* **Clock issues**
+
+    * Redis TTL is based on the Redis server’s wall clock. Large clock jumps can skew TTL behaviour.
+* **Long pauses**
+
+    * If a process stops (GC, OS pause) longer than the TTL, it might *think* it still holds a lock it actually lost. Its future `Release` / `Renew` calls will be no-ops (by design), but any work it continues doing is not actually protected anymore.
+* **Network partitions / timeouts**
+
+    * A client may not be able to distinguish “lock acquired but network error” from “lock not acquired at all” unless careful. A common approach is to treat such states conservatively and rely on idempotent operations.
+
+Practical guidance:
+
+* Make the operations under the lock **idempotent or retriable**.
+* Choose TTLs that are **longer than normal workloads**, but **not so long** that stale locks block progress for ages.
+* Use metrics and logs on:
+
+    * Lock acquisition latency
+    * Contention rate
+    * Renew failures
+
+---
+
+## 11. Beyond mutex: xlock/slock compatibility
+
+Once there is a solid mutex, it’s natural to think about more advanced lock modes:
+
+* **Exclusive lock (xlock):**
+  Only one xlock holder at a time.
+* **Shared lock (slock):**
+  Multiple shared holders can coexist, but an exclusive lock must not overlap with any shared holders.
+
+The typical compatibility matrix looks like this:
+
+| Existing holder(s) | Incoming SLock | Incoming XLock |
+| ------------------ | -------------- | -------------- |
+| none               | ✅ allowed      | ✅ allowed      |
+| SLock(s) only      | ✅ allowed      | ❌ blocked      |
+| XLock              | ❌ blocked      | ❌ blocked      |
+
+Under the hood, these modes can still be implemented on Redis using:
+
+* A combination of keys and sorted sets to represent queues and holders.
+* Similar token+TTL ideas.
+* More elaborate logic to keep track of multiple shared holders and to ensure writers don’t starve.
+
+However, these are **strictly more complex** than the simple mutex discussed here. For many systems, a single “exclusive lock” primitive covers most needs. If you do need shared/exclusive semantics, it’s worth designing those on top of the simpler mutex building blocks you already understand.
+
+---
+
+## 12. Summary
+
+To build a distributed lock library on top of a single Redis instance, you mostly need:
+
+* A clean API (Acquire / TryAcquire / Release / Renew / KeepAlive).
+* A **token + TTL** model:
+
+    * `SET key token NX PX ttl`
+    * Lua scripts for “only delete/extend if value == token”.
+* Careful handling of retries, timeouts, and renewals.
+* A clear understanding of what guarantees you get (and when they may break down).
+
+From there, you can:
+
+* Add observability (metrics, logs, tracing).
+* Add more lock modes (xlock/slock, semaphores) as needed.
+* Swap in other backends (Redlock, etcd, RDBMS) under the same API once the core semantics are clear.
