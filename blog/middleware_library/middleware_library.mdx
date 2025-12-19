@@ -1,0 +1,87 @@
+---
+slug: middleware_library
+title: How to Build a Distributed Lock Library on Top of a Single Redis
+authors: chien
+date: 2025-12-19
+tags: [library]
+---
+
+Over the past several years, my role as a middleware library leader has given me a front row seat to how infrastructure capabilities evolve inside a fast growing engineering organization. Middleware is rarely the most visible part of a system, but it quietly shapes developer productivity, system reliability, and long term scalability.
+
+This post reflects on the evolution of middleware libraries in our organization, from early open source adoption, through team level libraries, toward unified company level libraries, and ultimately a unified middleware platform. Each stage solved real problems, and each revealed new limitations that pushed us forward.
+
+---
+
+## Phase 1: Direct Use of Open Source Libraries
+
+In the early days, most teams built services directly on top of open source middleware clients. For example Kafka consumers, or Redis drivers were used as is, with each service responsible for implementing its own higher level logic.
+
+This approach offered flexibility, but it came with significant hidden costs.
+
+Each team had to implement core middleware behaviors from scratch, such as retry strategies, message dispatching, backoff policies, idempotency handling, and error classification. These were not business differentiators, yet they consumed substantial engineering effort.
+
+As a result, code duplication was widespread. Similar logic existed across many services, often implemented slightly differently, with varying quality and correctness. Subtle bugs appeared repeatedly, especially around edge cases like partial failures, message reprocessing, or offset management.
+
+Another major issue was knowledge fragmentation. Many developers were not aware of common pitfalls or best practices. There was little shared learning, minimal documentation, and no consistent guidance. The same mistakes were rediscovered again and again, usually in production.
+
+At this stage, middleware behavior was highly service specific, fragile, and difficult to evolve systematically.
+
+---
+
+## Phase 2: Team Level Libraries
+
+To address repeated effort, teams began building their own internal middleware libraries. The goal was straightforward, reduce duplication within the team and encapsulate hard won experience into reusable components.
+
+This was a meaningful improvement. Teams moved faster, and common patterns such as retries or metrics were standardized within a local scope.
+
+However, new problems emerged as the organization scaled.
+
+Different teams built similar libraries independently, leading to duplication at a higher level. Even worse, inconsistent patterns started to solidify across teams. The same concept, such as retry semantics or error handling, could behave differently depending on which library a service depended on.
+
+Team re organizations amplified this issue. Within the same team, multiple libraries often coexisted, inherited from previous structures or historical decisions. Migration costs discouraged consolidation, so fragmentation persisted.
+
+Most of these libraries were built from past operational experience rather than formal R&D. Design decisions were pragmatic, but often undocumented. Over time, original authors moved on, and institutional knowledge faded.
+
+As business complexity increased, many team libraries struggled to keep up. Supporting new use cases required intrusive changes, and libraries gradually fell behind evolving platform capabilities.
+
+---
+
+## Phase 3: Unified Company Level Libraries
+
+The next inflection point was the move toward unified, company level middleware libraries.
+
+The core motivation was to eliminate systemic duplication and create a single, high quality abstraction that most services could rely on. Instead of every team solving the same problems, a shared library could encode best practices once and apply them everywhere.
+
+These unified libraries embedded common patterns by default. Retry strategies, circuit breaking, observability hooks, and failure handling were designed with input from domain experts, production incidents, user feedback, and internal experimentation.
+
+Importantly, ownership became explicit. A dedicated team maintained the libraries, ensuring consistent quality, timely fixes, and active evolution. This enabled faster adaptation to new business requirements and platform changes.
+
+Developer experience became a first class concern. Documentation improved, examples were standardized, and internal tooling such as chatbots helped answer usage questions and guide configuration. The barrier to correct usage dropped significantly.
+
+At this stage, middleware libraries shifted from being a collection of utilities to becoming a shared foundation.
+
+---
+
+## Phase 4: Unified Middleware Platform
+
+Eventually, it became clear that libraries alone were not enough.
+
+As adoption grew, configuration management, governance, and operational visibility became critical. This led to the emergence of a unified middleware platform layered on top of the libraries.
+
+Centralized configuration management simplified onboarding and reduced manual setup. New services could be brought online with consistent defaults and minimal friction.
+
+Governance improved through built in capabilities such as topology visualization, schema registries, access control management, and policy enforcement. These features were difficult or impossible to implement correctly at the service level.
+
+The platform also integrated operational tools for migration, troubleshooting, and diagnostics. Common workflows were standardized, reducing cognitive load on developers and operators alike.
+
+At this point, middleware was no longer just code. It was an ecosystem combining libraries, platform services, and operational tooling.
+
+---
+
+## Closing Thoughts
+
+Looking back, each stage of this evolution was a natural response to scale. Open source libraries optimized for flexibility. Team libraries optimized for local efficiency. Unified libraries optimized for consistency and quality. The unified platform optimized for governance and long term sustainability.
+
+As a middleware library leader, my biggest lesson is that technical excellence alone is not enough. Clear ownership, shared learning, developer experience, and alignment with organizational scale matter just as much as APIs and performance.
+
+Middleware may be invisible when it works well, but when it is designed intentionally, it becomes a force multiplier for the entire engineering organization.
