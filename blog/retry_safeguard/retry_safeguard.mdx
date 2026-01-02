@@ -1,0 +1,161 @@
+---
+slug: retry_safeguard
+title: Preventing Retry Storms with Retry Safeguards
+authors: chien
+date: 2026-01-02
+tags: [resilience, retries, circuit-breaker, middleware]
+---
+
+Retries are a double-edged reliability mechanism. When failures are transient, retries increase success rate. When failures correlate with saturation, retries can amplify load, worsen tail latency, and trigger a cascading failure commonly called a **retry storm**.
+
+This post explains retry storms, then compares four retry safeguard patterns:
+
+1. No retry
+2. Retrying (unbounded, for example retry 3 times)
+3. Retry budget (adaptive retry)
+4. Retry circuit breaker (retry-only breaker)
+
+The goal is not to argue that one pattern is always best, it is to provide a decision framework and evaluation metrics so you can pick the right safeguard for your dependency and traffic regime.
+
+## What is a retry storm
+
+A retry storm is a positive feedback loop:
+
+- Downstream starts failing or slowing down.
+- Callers retry.
+- Retry traffic increases total load.
+- Downstream saturates further, producing more timeouts and errors.
+- Callers retry even more, and the loop escalates.
+
+In practice, the storm becomes visible when **user traffic is flat but downstream traffic climbs**, accompanied by rising tail latency and utilization.
+
+### The key metric: retry amplification
+
+A useful way to quantify “storminess” is **Retry Amplification Factor (RAF)**, defined as:
+
+- **RAF = total request sends / original requests**
+
+RAF near 1 means little to no amplification. RAF near 3 to 4 typically indicates aggressive retry behavior during failures, and that is often the start of a storm.
+
+## How to evaluate safeguard patterns
+
+The following indicators are used to evaluate the safeguard patterns:
+
+- Error rate (based on original requests)
+- Tail latency (p95, p99 end-to-end)
+- Server utilization (CPU, QPS, connection rate)
+- Recovery time: the time it takes for the system to recover from a failure
+- Retry amplification (RAF): the ratio of total request sends to original requests
+- Error types (timeout, EOF, etc)
+- Retry success lift (RSL): the percentage of requests that are retried and successful
+- Breaker state metrics (open, half-open duration)
+- Budget utilization (BU) for token buckets
+
+The rest of this post uses these indicators to describe the tradeoffs of each pattern.
+
+## Pattern 1: No retry
+
+**What it is**
+
+You send exactly one attempt per original request.
+
+**Why teams use it**
+
+- RAF is stable at 1.
+- Downstream is protected from retry amplification.
+- Behavior is predictable, and debugging is simpler.
+
+**Where it struggles**
+
+- You lose recovery for transient errors (short network blips, brief GC pauses, leader election hiccups).
+- If your dependency is mostly healthy but occasionally flaky, success rate can suffer unnecessarily.
+
+**What you should see in metrics**
+
+- RAF: ~1
+- Utilization: lowest among options
+- Tail latency: often best during incidents (less self-inflicted load)
+
+## Pattern 2: Retries (for example “retry 3 times”)
+
+**What it is**
+
+You retry on retryable errors up to N times, usually with backoff and jitter.
+
+**Why teams use it**
+
+- Highest potential recovery in transient failure regimes.
+- Easy to implement and reason about locally.
+
+**Where it breaks**
+
+- Under overload or partial outage, retries can turn into load multipliers, and cause or worsen a retry storm.
+- If many clients share similar retry schedules, they can synchronize and create “waves” of retries.
+
+**What you should see in metrics**
+
+- RAF: rises with failures, can spike aggressively
+- Utilization: can increase sharply during errors (this is the dangerous coupling)
+- Tail latency: can worsen rapidly under saturation
+- RSL: often high in truly transient regimes, misleadingly low in overload regimes (many retries are wasted)
+
+## Pattern 3: Retry budget (adaptive retry)
+
+**What it is**
+
+Retries are allowed, but within a **budget**, for example, “no more than 10 percent of the number of successful requests”. This is commonly implemented as a token bucket, which caps retry volume and prevents unbounded retry growth.
+
+**Why teams use it**
+
+- Preserves some recovery benefit while bounding RAF.
+- Naturally “self-throttles” as success rate changes, because the budget is tied to success or a refill rule.
+
+**Key tradeoff**
+
+- In severe failures, you may see near-zero success via retries because the budget limits additional load (that is the point), but it can look like “retries do not help” unless you interpret it correctly.
+- Budget accuracy matters, you need good accounting and windowing, especially during sharp traffic changes.
+
+**What you should see in metrics**
+
+- RAF: controlled, typically lower than unbounded retries
+- BU: rises toward 100% during failure regimes
+- Utilization: lower than unbounded retries, higher than no retry (by design, but capped)
+- RSL: moderate in transient regimes, low in sustained overload regimes
+
+## Pattern 4: Retry circuit breaker (retry-only breaker)
+
+**What it is**
+
+The client **disables retries** if the percentage of service errors exceeds a threshold (for example 80%). When the error rate drops below the threshold and stays below for a while, retries are resumed. Baseline traffic continues, only retries are blocked.
+
+**How it differs from a normal circuit breaker**
+
+- A normal circuit breaker cuts off requests (including original traffic) when a failure threshold is met.
+- A retry circuit breaker cuts off only retry traffic, which avoids “all-or-nothing” request shedding while still preventing retry amplification.
+
+**Why teams use it**
+
+- Prevents retry storms while keeping baseline traffic flowing.
+- Smoother than a full circuit breaker, fewer availability cliffs.
+- Faster recovery than full circuit breaker, retries resume automatically when error rate improves.
+
+**Where it struggles**
+
+- Baseline traffic can still overload an unhealthy service, since you are not shedding original load.
+- It may suppress retries during brief, blameless blips if thresholds and hysteresis are not tuned well.
+
+**What you should see in metrics**
+
+- RAF: drops sharply when the retry breaker is “open” (because retries are blocked)
+- Breaker state metrics: visible open/close behavior
+- Utilization: lower than unbounded retries during incidents, can still be high if baseline is large
+- RSL: depends heavily on how often the breaker opens, but it is usually higher than retry budget in regimes where some bounded retry could still be valuable
+
+## Side-by-side summary
+
+| Pattern               | Main benefit                               | Main risk                                                 | Best fit                                                                  |
+| --------------------- | ------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------- |
+| No retry              | No amplification, simplest behavior        | No transient recovery                                     | Dependencies under frequent overload, or where retries are usually waste  |
+| Retries (unbounded)   | Max recovery in transient failures         | Retry storms under overload, tail latency blowups         | Low risk dependencies, low concurrency, proven transient errors           |
+| Retry budget          | Bounded recovery, caps RAF                 | Needs correct accounting, can limit recovery if mis-tuned | General-purpose default for large-scale systems                           |
+| Retry circuit breaker | Blocks retry storms while keeping baseline | Baseline can still overload service, threshold tuning     | When you want “retry off during high-error” behavior, simpler than budget |
