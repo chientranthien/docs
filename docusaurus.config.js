@@ -59,6 +59,7 @@ const config = {
             'https://github.com/chientranthien/docs/tree/master/',
         },
         blog: {
+          routeBasePath: '/',
           blogSidebarTitle: 'All posts',
           blogSidebarCount: 'ALL',
           showReadingTime: true,
@@ -90,13 +91,6 @@ const config = {
         },
         items: [
           {
-            type: 'docSidebar',
-            sidebarId: 'goldenPay',
-            position: 'left',
-            label: 'GoldenPay'
-          },
-          {to: '/blog', label: 'Blog', position: 'left'},
-          {
             href: 'https://github.com/chientranthien/docs',
             label: 'GitHub',
             position: 'right',
@@ -107,15 +101,15 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
+            title: 'Explore',
             items: [
               {
-                label: 'GoldenPay',
-                to: '/docs/golden_pay/intro',
+                label: 'Blog',
+                to: '/',
               },
               {
-                label: 'Blog',
-                to: '/blog',
+                label: 'Docs',
+                to: '/docs/intro',
               },
             ],
           },
